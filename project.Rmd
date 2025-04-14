@@ -1,0 +1,294 @@
+---
+title: "Bankruptcy Prediction for Polish Enterprises"
+author: "Jakub Wasiczek, Olga Sieradzan"
+date: "2025-04-10"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+library(foreign)
+library(caret)
+library(dplyr)
+library(MASS)
+library(naivebayes)
+library(randomForest)
+setwd("C:/Users/qbawa/OneDrive/Pulpit/ryzyko-projekt")
+```
+  
+# Loading data:  
+
+```{r, warning=FALSE}
+y5 <- read.csv("5year.arff", header=FALSE, comment.char = "@") #One year till default
+
+#Removing missing data
+data <- y5[-which(y5 == "?"),] 
+data[,1:64] <- lapply(data[,1:64], as.numeric)
+data <- na.omit(data)
+data$V65 <- as.factor(data$V65)
+
+
+#Making seperate data frames for each class
+def <- data %>% filter(V65 == 1)
+no_def <- data %>% filter(V65 == 0)
+
+set.seed(900) #We'll be randomly selecting data
+
+#Training set
+train_no_def <- no_def[sample(1:nrow(no_def), 70, replace = T),]
+train_def <- def[sample(1:nrow(def), 70, replace = T),]
+training_set <- rbind(train_no_def,train_def)
+
+#Testing set
+test_def <- def[!rownames(def) %in% rownames(train_def), ]
+test_def <- test_def[sample(1:nrow(test_def), 32, replace = FALSE), ]
+
+test_no_def <- no_def[!rownames(no_def) %in% rownames(train_no_def), ]
+test_no_def <- test_no_def[sample(1:nrow(test_no_def), 32, replace = FALSE), ]
+
+testing_set <- rbind(test_def, test_no_def)
+
+#Choosing the variables that meet the formal criteria 
+variables <- c()
+for(i in colnames(training_set[,-65])){
+  if(sd(training_set[[i]])/mean(training_set[[i]]) > 0.1){
+    variables <- c(variables, i)
+  }
+}
+
+cor_matrix <- cor(training_set[,variables], use = "complete.obs")
+high_cor <- abs(cor_matrix) > 0.7
+to_remove <- c()
+for(i in 1:(ncol(cor_matrix)-1)){
+  for(j in (i+1):ncol(cor_matrix)){
+    if(abs(cor_matrix[i, j]) > 0.7){
+      to_remove <- c(to_remove, colnames(cor_matrix)[j])
+    }
+  }
+}
+to_remove <- unique(to_remove)
+to_remove <- c(to_remove)
+final_variables <- setdiff(variables, to_remove)
+fmla <- reformulate(final_variables, response = "V65")
+```  
+ 
+# Assumptions in LDA  
+ 
+LDA relies on two key assumptions:  
+ 
+1. Predictors are normally distributed within each class  
+ 
+2. All classes share the same covariance matrix (i.e., equal variance)
+  
+```{r}
+#Quick check for normality 
+norm_list = list(NULL)
+j = 1
+for(i in 1:(ncol(def)-1)){
+  if(shapiro.test(def[,i])$p.value > 0.05){
+    norm_list[j] = colnames(def)[i]
+    j = j + 1
+  }
+}
+print("H0 in default class wasn't rejected for: ")
+norm_list
+
+norm_list = list(NULL)
+j = 1
+for(i in 1:(ncol(no_def)-1)){
+  if(shapiro.test(no_def[,i])$p.value > 0.05){
+    norm_list[j] = colnames(no_def)[i]
+    j = j + 1
+  }
+}
+
+print("H0 in no_default class wasn't rejected for: ")
+norm_list
+
+```  
+As we can see the, the assumption in case of our data is violated in almost every case.  
+
+  
+Second assumption concerns the variance and again after quick check:  
+ 
+```{r}
+#Quick var check 
+var_list = list(NULL)
+j = 1
+
+for(i in 1:(ncol(def)-1)){
+  if(var.test(def[,i], no_def[,i])$p.value > 0.05){
+    var_list[j] = colnames(def)[i]
+    j = j + 1
+  }
+}
+print("H0 wasn't rejected for: ")
+var_list
+
+
+```  
+  
+We can see that this assumption also does not hold for most of the 64 predictors. 
+ 
+Thankfully LDA is quite resistant to violated assumptions.
+ 
+# QDA  
+ 
+Quadratic Discriminant Analysis (QDA) is an extension of LDA that relaxes the assumption of equal class covariances. While this makes QDA more flexible, it comes at a cost: instead of estimating a single covariance matrix with $p(p+1)/2$ parameters (where *p* is the number of predictors), QDA requires estimating a separate covariance matrix for each class, resulting in $K*p(p+1)/2$ parameters. This significantly increases the variance of the estimators, which is why QDA isn't always preferred over LDA — especially with limited data.
+ 
+```{r}
+
+qda_model <- qda(fmla, data = training_set)
+
+pred <- predict(qda_model, testing_set)
+
+tab <- table(testing_set$V65, pred$class)
+dimnames(tab) <- list(
+  "Actual" = levels(testing_set$V65),
+  "Predicted" = levels(pred$class)
+)
+tab
+
+cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
+cat("False negative rate: ", 100*tab[1,2]/(tab[1,1]+tab[1,2]), "%\n")
+```  
+
+  
+# Naive Bayes  
+ 
+Naive Bayes makes a strong assumption that all predictors are independent. This means the joint probability of the predictor vector *X* belonging to class *k* is simply the product of the individual predictor densities. In practice, this assumption rarely holds—especially in our case, where many financial ratios are derived from overlapping data. However, since we initially removed highly correlated variables, Naive Bayes may still perform reasonably well. 
+  
+```{r}
+
+nb_model <- naive_bayes(fmla, data = training_set)
+
+pred <- predict(nb_model, testing_set)
+
+tab <- table(testing_set$V65, pred)
+dimnames(tab) <- list(
+  "Actual" = levels(testing_set$V65),
+  "Predicted" = levels(pred)
+)
+tab
+
+cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
+cat("False negative rate: ", 100*tab[1,2]/(tab[1,1]+tab[1,2]), "%\n")
+```
+ 
+# Logistic regeression  
+  
+Logistic regression is used to model a categorical response variable, typically to predict one of two classes based on a set of predictors, which can be continuous, categorical, or both.  
+ 
+Given the binary nature of our classification task, logistic regression is a natural choice. Both logistic regression and Linear Discriminant Analysis (LDA) estimate linear decision boundaries. However, logistic regression maximizes the likelihood function without assuming a specific distribution for the predictors—unlike LDA, which assumes normality.  
+ 
+Since we've previously shown that our predictors do not follow a normal distribution, logistic regression is likely to outperform LDA in this case.  
+ 
+We'll begin by selecting the model parameters:
+ 
+```{r}
+lr_model <- glm(fmla, family=binomial(link='logit'), data = training_set)
+lr_model <- step(lr_model, direction = "both", trace = 0)
+summary(lr_model)  
+``` 
+   
+Not all variables were significant  individually, but were jointly significant.  
+ 
+Now that we have our predictors we can start the prediction: 
+ 
+```{r}
+test <- predict(lr_model, testing_set, type='response')
+pred <- ifelse(test > 0.5,1,0)
+
+tab <- table(testing_set$V65, pred)
+dimnames(tab) <- list(
+  "Actual" = levels(testing_set$V65),
+  "Predicted" = levels(pred)
+)
+tab
+
+cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
+cat("False negative rate: ", 100*tab[1,2]/(tab[1,1]+tab[1,2]), "%\n")
+
+```  
+ 
+We've reached the accuracy of around 73,4%, which beats LDA models. 
+  
+   
+# Random Forest  
+ 
+Random Forest is a machine learning algorithm based on the idea that combining many weak models can produce a stronger one—a technique known as ensemble learning. The algorithm works as follows:  
+ 
+1. Multiple decision trees are built, each trained on a different random subset of the training data (using bootstrap sampling).  
+ 
+2. At each split in a tree, a random subset of features is selected, and the best one is chosen to split the data.  
+ 
+3. Each tree votes for a class, and the final prediction is made by majority vote.  
+ 
+Below, we present a result of an implementation of this method:
+ 
+```{r}
+
+forest <- randomForest(V65 ~ ., training_set)
+pred <- predict(forest, testing_set)
+
+tab <- table(testing_set$V65, pred)
+dimnames(tab) <- list(
+  "Actual" = levels(testing_set$V65),
+  "Predicted" = levels(pred)
+)
+tab
+
+cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
+cat("False negative rate: ", 100*tab[1,2]/(tab[1,1]+tab[1,2]), "%\n")
+```  
+ 
+We observed that the model achieved a level of accuracy comparable to previous approaches.  
+ 
+Since the project was initially based on a limited dataset—focusing only on companies one year before bankruptcy—we now aim to test whether including a new variable, "Number of years before bankruptcy," can improve prediction performance. By expanding the dataset in this way, we increase the sample size, which gives us reason to believe that the model may achieve better results.
+  
+```{r, warning=FALSE}
+#Removing missing data
+final_data <- data
+final_data$ytd <- 1
+
+for(i in 1:4){
+  file_name <- paste0(i, "year.arff")
+  yi <- read.csv(file_name, header=FALSE, comment.char = "@")
+  data_unc <- yi[-which(yi == "?"),] 
+  data_unc[,1:64] <- lapply(data_unc[,1:64], as.numeric)
+  data_unc <- na.omit(data_unc)
+  data_unc$V65 <- as.factor(data_unc$V65)
+  
+  data_unc$ytd <- 6-i
+  
+  final_data <- rbind(final_data, data_unc)
+}
+
+final_data$ytd <- as.factor(final_data$ytd)
+
+large_training_set <- final_data %>%
+  group_by(V65) %>%
+  sample_n(size = floor(0.7 * min(table(final_data$V65)))) %>%
+  ungroup()
+
+large_test_set <- anti_join(final_data, large_training_set)
+
+
+forest <- randomForest(V65 ~ ., large_training_set)
+
+pred <- predict(forest, large_test_set)
+
+tab <- table(large_test_set$V65, pred)
+dimnames(tab) <- list(
+  "Actual" = levels(large_test_set$V65),
+  "Predicted" = levels(pred)
+)
+tab
+
+cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
+cat("False negative rate: ", 100*tab[1,2]/(tab[1,1]+tab[1,2]), "%\n")
+```

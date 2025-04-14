@@ -15,3 +15,126 @@ output:
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
+```{r}
+library(foreign)
+library(dplyr)
+library(cowplot)
+library(ggplot2)
+library(readr)
+library(readxl)
+
+```
+
+***
+
+# Introduction
+
+***
+
+Corporate bankruptcy prediction is a critical area of financial analysis, with significant implications for investors, creditors, and policymakers. Accurate early warning systems can help mitigate risks, optimize decision-making, and ensure economic stability. Over the years, various statistical and machine learning models have been developed to assess the financial health of companies and predict their likelihood of failure.
+
+This project explores and compares multiple predictive models for bankruptcy assessment, ranging from traditional econometric approaches to modern machine learning techniques. We evaluate the effectiveness of models such as the Altman Z-score (a classic discriminant analysis tool), legendary Tutson model, logistic regression, decision trees, random forests, and other advanced classifiers. 
+
+The aim of this project is to assest numerous models predictions on bancrupcy for polish companies between year 2000- 2013.
+
+***
+
+# Dataset
+
+***
+
+The dataset consist 64 variables conected to financial situation of each company and corresponding class label that indicates bankruptcy status after 1 year. The data contains 5910 instances (financial statements), 410 represents bankrupted companies, 5500 firms that did not bankrupt in the forecasting period.
+
+***
+
+# Altman model
+
+***
+
+The Altman Z-Score is a classic financial model developed by Edward Altman in 1968 to predict the likelihood of corporate bankruptcy. It combines multiple financial ratios (such as profitability, leverage, liquidity, and efficiency) into a single discriminant score using a weighted formula. The original version for manufacturing firms is calculated as:
+
+$$
+Z = 1.2X_1 + 1.4X_2 + 3.3X_3 + 0.6X_4 + 0.99X_5
+$$
+
+  represent ratios like working capital/total assets, retained earnings/total assets, EBIT/total assets, market value equity/total liabilities, and sales/total assets. Based on the Z-score, companies are classified as:
+
+Safe (Z > 2.99) – Low bankruptcy risk.
+
+Grey Zone (1.81 ≤ Z ≤ 2.99) – Moderate risk.
+
+Distress (Z < 1.81) – High bankruptcy risk.
+
+The model is widely used due to its simplicity and empirical robustness.
+
+***
+
+# Tutson model
+
+***
+
+The Tutsona Model is an analytical tool researchers developed using linear discriminant analysis (LDA) tailored specifically for Polish companies. The model’s name is no accident—it pays tribute to a true master of motivation, an undisputed expert in stress management, and an unrivaled specialist in... sunbeam naps. Yes, I’m talking about Tutek, a chonky cat who not only provided moral support with his presence but also inspired groundbreaking solutions in finance and stock market analysis.
+
+Thanks to his unwavering belief in success (and his knack for sitting on my keyboard at critical moments), the Tutsona Model became a symbol of combining academic precision with feline wisdom. It’s more than just an analytical tool—it’s a tribute to a true legend, proving that even the toughest challenges can be overcome with a bit of cat philosophy and a good nap.
+
+```{r}
+knitr::include_graphics("C:/Users/olgas/OneDrive/Documents/GitHub/Quantative-risk-models-summit/WhatsApp Image 2025-03-06 at 09.54.51_3e79e9e8.jpg")
+```
+
+***
+
+# Logistic Regression
+
+***
+
+Logistic regression is a statistical method used to predict binary outcomes (e.g., bankruptcy vs. solvency) by modeling the probability of an event occurring. Unlike linear regression, it uses the logistic function (sigmoid curve) to output values between 0 and 1, interpreted as the likelihood of default. Key features include:
+
+* Input: Financial ratios (e.g., liquidity, leverage).
+
+* Output: Probability (e.g., "0.8" = 80% chance of bankruptcy).
+
+* Advantages: Simple, interpretable (coefficients show variable impact), and works well for linearly separable data.
+
+For example, a model might reveal that high debt-to-equity ratios significantly increase bankruptcy risk. While less flexible than ML algorithms, it remains a benchmark tool for financial distress analysis.
+
+***
+
+# XGBoost (Extreme Gradient Boosting)
+
+***
+
+XGBoost (Extreme Gradient Boosting) is a powerful machine learning algorithm that excels at predicting bankruptcy by combining multiple weak "decision trees" into a highly accurate ensemble model. Key features:
+
+* How it works: Iteratively corrects errors from previous trees, focusing on "hard-to-predict" cases.
+
+* Strengths: Handles non-linear patterns, missing data, and imbalanced datasets (common in bankruptcy cases).
+
+* Bonus: Built-in regularization prevents overfitting, making it robust even with small financial datasets.
+
+For example, XGBoost might detect complex interactions between profitability ratios and market conditions that simpler models miss. While less interpretable than logistic regression, its performance often dominates in predictive accuracy.
+
+***
+
+# Random Forest Model
+
+***
+
+The Random Forest model is an ensemble machine learning method that builds multiple decision trees and merges their predictions to improve accuracy and reduce overfitting. Here’s why it works well for bankruptcy prediction:
+
+* How it works:
+
+Trains hundreds of decision trees on random subsets of data (bagging) and features (feature randomness).
+
+Combines their votes (for classification) or averages their outputs (for regression).
+
+* Strengths:
+
+Handles non-linear relationships and high-dimensional data (e.g., dozens of financial ratios).
+
+Robust to outliers and noise—useful for messy real-world financial data.
+
+Provides feature importance scores, revealing which ratios (e.g., debt-to-equity, liquidity) matter most.
+
+* Limitation: Less interpretable than single decision trees but more accurate.
+
+

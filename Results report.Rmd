@@ -39,11 +39,15 @@ The aim of this project is to assest numerous models predictions on bancrupcy fo
 
 ***
 
-# Dataset
+# Dataset and methodology
 
 ***
 
 The dataset consist 64 variables conected to financial situation of each company and corresponding class label that indicates bankruptcy status after 1 year. The data contains 5910 instances (financial statements), 410 represents bankrupted companies, 5500 firms that did not bankrupt in the forecasting period.
+
+Wyrzuciliśmy z wyoskoa korelacja, powyzej 70 %, i minimalna zmiennosć 10 % , braki poprostu wyjabne 
+
+Wypisac zywe paramtey
 
 ***
 
@@ -81,12 +85,14 @@ Thanks to his unwavering belief in success (and his knack for sitting on my keyb
 knitr::include_graphics("C:/Users/olgas/OneDrive/Documents/GitHub/Quantative-risk-models-summit/WhatsApp Image 2025-03-06 at 09.54.51_3e79e9e8.jpg")
 ```
 
+Założenia w LDA wypisać i powiedzieć czemu nie wyszlo, Rownośc wariancji 
 *** 
 
 # Quadratic Discriminant Analysis
 
 Quadratic Discriminant Analysis (QDA) is an extension of LDA that relaxes the assumption of equal class covariances. While this makes QDA more flexible, it comes at a cost: instead of estimating a single covariance matrix with $p(p+1)/2$ parameters (where *p* is the number of predictors), QDA requires estimating a separate covariance matrix for each class, resulting in $K*p(p+1)/2$ parameters. This significantly increases the variance of the estimators, which is why QDA isn't always preferred over LDA — especially with limited data.
 
+Nie zakladamy rownosci wariancji, 
 ***  
 
 # Naive Bayes  
@@ -109,19 +115,15 @@ Logistic regression is a statistical method used to predict binary outcomes (e.g
 
 For example, a model might reveal that high debt-to-equity ratios significantly increase bankruptcy risk. While less flexible than ML algorithms, it remains a benchmark tool for financial distress analysis.
 
+Modyfikacja treshoholdu 
+
 ***
 
 # XGBoost (Extreme Gradient Boosting)
 
 ***
 
-XGBoost (Extreme Gradient Boosting) is a powerful machine learning algorithm that excels at predicting bankruptcy by combining multiple weak "decision trees" into a highly accurate ensemble model. Key features:
-
-* How it works: Iteratively corrects errors from previous trees, focusing on "hard-to-predict" cases.
-
-* Strengths: Handles non-linear patterns, missing data, and imbalanced datasets (common in bankruptcy cases).
-
-* Bonus: Built-in regularization prevents overfitting, making it robust even with small financial datasets.
+XGBoost (Extreme Gradient Boosting) is a powerful machine learning algorithm that excels at predicting bankruptcy by combining multiple weak "decision trees" into a highly accurate ensemble model. Model iteratively corrects errors from previous trees, focusing on "hard-to-predict" cases. Additionaly it Handles non-linear patterns, missing data, and imbalanced datasets (common in bankruptcy cases). Built-in regularization prevents overfitting, making it robust even with small financial datasets.
 
 For example, XGBoost might detect complex interactions between profitability ratios and market conditions that simpler models miss. While less interpretable than logistic regression, its performance often dominates in predictive accuracy.
 
@@ -131,22 +133,29 @@ For example, XGBoost might detect complex interactions between profitability rat
 
 ***
 
-The Random Forest model is an ensemble machine learning method that builds multiple decision trees and merges their predictions to improve accuracy and reduce overfitting. Here’s why it works well for bankruptcy prediction:
+The Random Forest model is an ensemble machine learning method that builds multiple decision trees and merges their predictions to improve accuracy and reduce overfitting. Model trains hundreds of decision trees on random subsets of data (bagging) and features (feature randomness). Combines their votes (for classification) or averages their outputs (for regression). This model handles non-linear relationships and high-dimensional data (e.g., dozens of financial ratios),althought it's less interpretable than single decision trees, it's more accurate.
 
-* How it works:
 
-Trains hundreds of decision trees on random subsets of data (bagging) and features (feature randomness).
+***
 
-Combines their votes (for classification) or averages their outputs (for regression).
+# Model comparasion
 
-* Strengths:
+***
 
-Handles non-linear relationships and high-dimensional data (e.g., dozens of financial ratios).
+***
 
-Robust to outliers and noise—useful for messy real-world financial data.
+# Large traing set senerio
 
-Provides feature importance scores, revealing which ratios (e.g., debt-to-equity, liquidity) matter most.
+***
 
-* Limitation: Less interpretable than single decision trees but more accurate.
+Dodanie random forest na zwykłym i na large zbiorze
+
+***
+
+# Conclusions
+
+***
+
+
 
 

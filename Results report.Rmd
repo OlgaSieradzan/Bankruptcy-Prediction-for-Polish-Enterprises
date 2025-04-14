@@ -81,6 +81,18 @@ Thanks to his unwavering belief in success (and his knack for sitting on my keyb
 knitr::include_graphics("C:/Users/olgas/OneDrive/Documents/GitHub/Quantative-risk-models-summit/WhatsApp Image 2025-03-06 at 09.54.51_3e79e9e8.jpg")
 ```
 
+*** 
+
+# Quadratic Discriminant Analysis
+
+Quadratic Discriminant Analysis (QDA) is an extension of LDA that relaxes the assumption of equal class covariances. While this makes QDA more flexible, it comes at a cost: instead of estimating a single covariance matrix with $p(p+1)/2$ parameters (where *p* is the number of predictors), QDA requires estimating a separate covariance matrix for each class, resulting in $K*p(p+1)/2$ parameters. This significantly increases the variance of the estimators, which is why QDA isn't always preferred over LDA — especially with limited data.
+
+***  
+
+# Naive Bayes  
+ 
+Naive Bayes makes a strong assumption that all predictors are independent. This means the joint probability of the predictor vector *X* belonging to class *k* is simply the product of the individual predictor densities. In practice, this assumption rarely holds—especially in our case, where many financial ratios are derived from overlapping data. However, since we initially removed highly correlated variables, Naive Bayes may still perform reasonably well. 
+
 ***
 
 # Logistic Regression

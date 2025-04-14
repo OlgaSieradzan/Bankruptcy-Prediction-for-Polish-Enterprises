@@ -155,7 +155,7 @@ dimnames(tab) <- list(
 tab
 
 cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
-cat("False negative rate: ", 100*tab[1,2]/(tab[1,1]+tab[1,2]), "%\n")
+cat("False negative rate: ", 100*tab[2,1]/(tab[2,1]+tab[2,2]), "%\n")
 ```  
 
   
@@ -177,7 +177,7 @@ dimnames(tab) <- list(
 tab
 
 cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
-cat("False negative rate: ", 100*tab[1,2]/(tab[1,1]+tab[1,2]), "%\n")
+cat("False negative rate: ", 100*tab[2,1]/(tab[2,1]+tab[2,2]), "%\n")
 ```
  
 # Logistic regeression  
@@ -212,7 +212,7 @@ dimnames(tab) <- list(
 tab
 
 cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
-cat("False negative rate: ", 100*tab[1,2]/(tab[1,1]+tab[1,2]), "%\n")
+cat("False negative rate: ", 100*tab[2,1]/(tab[2,1]+tab[2,2]), "%\n")
 
 ```  
  
@@ -244,7 +244,7 @@ dimnames(tab) <- list(
 tab
 
 cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
-cat("False negative rate: ", 100*tab[1,2]/(tab[1,1]+tab[1,2]), "%\n")
+cat("False negative rate: ", 100*tab[2,1]/(tab[2,1]+tab[2,2]), "%\n")
 ```  
  
 We observed that the model achieved a level of accuracy comparable to previous approaches.  
@@ -291,5 +291,5 @@ dimnames(tab) <- list(
 tab
 
 cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
-cat("False negative rate: ", 100*tab[1,2]/(tab[1,1]+tab[1,2]), "%\n")
+cat("False negative rate: ", 100*tab[2,1]/(tab[2,1]+tab[2,2]), "%\n")
 ```

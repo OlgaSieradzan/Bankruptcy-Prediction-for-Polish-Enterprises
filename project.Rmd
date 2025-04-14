@@ -17,7 +17,8 @@ library(dplyr)
 library(MASS)
 library(naivebayes)
 library(randomForest)
-setwd("C:/Users/qbawa/OneDrive/Pulpit/ryzyko-projekt")
+#setwd("C:/Users/qbawa/OneDrive/Pulpit/ryzyko-projekt")
+setwd("C:/Users/olgas/OneDrive/Documents/GitHub/Quantative-risk-models-summit/Altman-model_files/5year.arff")
 ```
   
 # Loading data:  

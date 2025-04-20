@@ -17,14 +17,15 @@ library(dplyr)
 library(MASS)
 library(naivebayes)
 library(randomForest)
+
 #setwd("C:/Users/qbawa/OneDrive/Pulpit/ryzyko-projekt")
-setwd("C:/Users/olgas/OneDrive/Documents/GitHub/Quantative-risk-models-summit/Altman-model_files/5year.arff")
+setwd("C:/Users/olgas/OneDrive/Documents/GitHub/Quantative-risk-models-summit/Altman-model_files")
 ```
   
 # Loading data:  
 
 ```{r, warning=FALSE}
-y5 <- read.csv("5year.arff", header=FALSE, comment.char = "@") #One year till default
+y5 <- read.csv("5year.arff", header = TRUE, comment.char = "@") #One year till default
 
 #Removing missing data
 data <- y5[-which(y5 == "?"),] 

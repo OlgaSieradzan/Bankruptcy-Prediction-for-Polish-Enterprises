@@ -1,0 +1,106 @@
+---
+title: "Code"
+author: "Olga Sieradzan, Jakub Wasiczek"
+date: "2025-04-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(foreign)
+library(caret)
+library(dplyr)
+library(MASS)
+library(naivebayes)
+library(randomForest)
+library(xgboost)
+y5 <- read.csv("5year.arff", header = TRUE, comment.char = "@")
+colnames(y5) <- paste0("V", 1:65)
+#Removing missing data
+data <- y5[-which(y5 == "?"),] 
+data[,1:64] <- lapply(data[,1:64], as.numeric)
+data <- na.omit(data)
+data$V65 <- as.factor(data$V65)
+
+
+#Making seperate data frames for each class
+def <- data %>% filter(V65 == 1)
+no_def <- data %>% filter(V65 == 0)
+
+set.seed(900) #We'll be randomly selecting data
+
+#Training set
+train_no_def <- no_def[sample(1:nrow(no_def), 70, replace = T),]
+train_def <- def[sample(1:nrow(def), 70, replace = T),]
+training_set <- rbind(train_no_def,train_def)
+
+#Testing set
+test_def <- def[!rownames(def) %in% rownames(train_def), ]
+test_def <- test_def[sample(1:nrow(test_def), 32, replace = FALSE), ]
+
+test_no_def <- no_def[!rownames(no_def) %in% rownames(train_no_def), ]
+test_no_def <- test_no_def[sample(1:nrow(test_no_def), 32, replace = FALSE), ]
+
+testing_set <- rbind(test_def, test_no_def)
+
+#Choosing the variables that meet the formal criteria 
+variables <- c()
+for(i in colnames(training_set[,-65])){
+  if(sd(training_set[[i]])/mean(training_set[[i]]) > 0.1){
+    variables <- c(variables, i)
+  }
+}
+
+cor_matrix <- cor(training_set[,variables], use = "complete.obs")
+high_cor <- abs(cor_matrix) > 0.7
+to_remove <- c()
+for(i in 1:(ncol(cor_matrix)-1)){
+  for(j in (i+1):ncol(cor_matrix)){
+    if(abs(cor_matrix[i, j]) > 0.7){
+      to_remove <- c(to_remove, colnames(cor_matrix)[j])
+    }
+  }
+}
+to_remove <- unique(to_remove)
+to_remove <- c(to_remove)
+final_variables <- setdiff(variables, to_remove)
+fmla <- reformulate(final_variables, response = "V65")
+```
+
+***
+
+# XGB
+
+***
+
+```{r}
+xgb_model <- xgboost(
+  data = (as.matrix(training_set[,final_variables])),
+  label = as.numeric(training_set$V65)-1,
+  nrounds = 100,
+  objective = "binary:logistic",
+  verbose = 0
+)
+
+pred_prob <- predict(xgb_model,  (as.matrix(testing_set[,final_variables])))
+pred_class <- ifelse(pred_prob > 0.5, 1, 0)
+
+print(length(testing_set$V65))
+
+tab <- table(
+  "Actual" = levels(testing_set$V65),
+  "Predicted" = levels(pred_class)
+)
+
+print(tab)
+
+accuracy <- 100 * sum(diag(tab)) / sum(tab)
+false_negative_rate <- 100 * tab["1", "0"] / sum(tab["1", ])
+
+cat("Accuracy: ", round(accuracy, 2), "%\n")
+cat("False negative rate: ", round(false_negative_rate, 2), "%\n")
+```
+

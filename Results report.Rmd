@@ -23,6 +23,9 @@ library(ggplot2)
 library(readr)
 library(readxl)
 
+y5 <- read.csv("5year.arff", header = TRUE, comment.char = "@")
+colnames(y5) <- paste0("V", 1:65)
+
 ```
 
 ***
@@ -39,15 +42,48 @@ The aim of this project is to assest numerous models predictions on bancrupcy fo
 
 ***
 
-# Dataset and methodology
+# Dataset
 
 ***
 
 The dataset consist 64 variables conected to financial situation of each company and corresponding class label that indicates bankruptcy status after 1 year. The data contains 5910 instances (financial statements), 410 represents bankrupted companies, 5500 firms that did not bankrupt in the forecasting period.
 
-Wyrzuciliśmy z wyoskoa korelacja, powyzej 70 %, i minimalna zmiennosć 10 % , braki poprostu wyjabne 
+There were some requirements set for data:
 
-Wypisac zywe paramtey
+* No missing data - all of the rows with data gaps were deleted
+
+* No high correlation between variables - variables with correlation hiher than 70% were deleted
+
+* No data showing little variation - variables with variablility lower than 10% were deleted
+
+After process of cleaning the traing set consist **23 variables and 140 observation (70 bancrupted and 70 not bancrupted)**, and the test set consist **23 variables and 64 observation (32 bancrupted and 32 not bancrupted)**
+
+The 23 left variables:
+
+V2 - total liabilities / total assets
+V3 - working capital / total assets
+V4 - current assets / short-term liabilities
+V9 - sales / total assets
+V12 - gross profit / short-term liabilities
+V13 - (gross profit + depreciation) / sales
+V15 - (total liabilities * 365) / (gross profit + depreciation)
+V20 - (inventory * 365) / sales
+V21 - sales (n) / sales (n-1)
+V24 - gross profit (in 3 years) / total assets
+V28 - working capital / fixed assets
+V29 - logarithm of total assets
+V30 - (total liabilities - cash) / sales
+V33 - operating expenses / short-term liabilities
+V37 - (current assets - inventories) / long-term liabilities
+V43 - rotation receivables + inventory turnover in days
+V55 - working capital
+V57 - (current assets - inventory - short-term liabilities) / (sales - gross profit - depreciation)
+V59 - long-term liabilities / equity
+V60 - sales / inventory
+V61 - sales / receivables
+V64 - sales / fixed assets
+
+
 
 ***
 
@@ -71,6 +107,7 @@ Distress (Z < 1.81) – High bankruptcy risk.
 
 The model is widely used due to its simplicity and empirical robustness.
 
+
 ***
 
 # Tutson model
@@ -85,14 +122,21 @@ Thanks to his unwavering belief in success (and his knack for sitting on my keyb
 knitr::include_graphics("C:/Users/olgas/OneDrive/Documents/GitHub/Quantative-risk-models-summit/WhatsApp Image 2025-03-06 at 09.54.51_3e79e9e8.jpg")
 ```
 
-Założenia w LDA wypisać i powiedzieć czemu nie wyszlo, Rownośc wariancji 
+
+The downfall of the Tutson model can be easily explained. Linear Discriminant Analysis (LDA) is a method that relies on several statistical assumptions—none of which were met by our dataset. First and foremost, LDA assumes that the predictor variables follow a normal distribution. In addition, it requires that all classes have equal covariance matrices. These assumptions are difficult to uphold in real-world data, which is one of the reasons behind the declining popularity of LDA in practical modeling applications.
+
+Over the past decade, a number of more flexible algorithms have been introduced and widely adopted in the financial sector. These include methods such as Random Forests, Gradient Boosting Machines, and Neural Networks. These newer approaches typically make fewer assumptions about the data and are better equipped to handle complex, non-linear relationships.
+
+But are they truly that much better? While they often outperform traditional methods like LDA in terms of predictive accuracy, they come with their own trade-offs—such as increased computational complexity, reduced interpretability, and a higher risk of overfitting if not properly tuned. Ultimately, the choice of algorithm should depend on the specific context, data characteristics, and the balance between accuracy and explainability required by the stakeholders.
+
+
 *** 
 
 # Quadratic Discriminant Analysis
 
 Quadratic Discriminant Analysis (QDA) is an extension of LDA that relaxes the assumption of equal class covariances. While this makes QDA more flexible, it comes at a cost: instead of estimating a single covariance matrix with $p(p+1)/2$ parameters (where *p* is the number of predictors), QDA requires estimating a separate covariance matrix for each class, resulting in $K*p(p+1)/2$ parameters. This significantly increases the variance of the estimators, which is why QDA isn't always preferred over LDA — especially with limited data.
 
-Nie zakladamy rownosci wariancji, 
+
 ***  
 
 # Naive Bayes  
@@ -113,7 +157,7 @@ Logistic regression is a statistical method used to predict binary outcomes (e.g
 
 * Advantages: Simple, interpretable (coefficients show variable impact), and works well for linearly separable data.
 
-For example, a model might reveal that high debt-to-equity ratios significantly increase bankruptcy risk. While less flexible than ML algorithms, it remains a benchmark tool for financial distress analysis.
+For example, a model might reveal that high debt-to-equity ratios significantly increase bankruptcy risk. While less flexible than ML algorithms, it remains a benchmark tool for financial distress analysis. In this study, the treshold for assesing brancrupcy is: 50%> - bancrupted, 50%=< - not bancrupted. Manipulation of this treshold can give intresting results in Accuracy or False Negative rates 
 
 Modyfikacja treshoholdu 
 
@@ -126,6 +170,8 @@ Modyfikacja treshoholdu
 XGBoost (Extreme Gradient Boosting) is a powerful machine learning algorithm that excels at predicting bankruptcy by combining multiple weak "decision trees" into a highly accurate ensemble model. Model iteratively corrects errors from previous trees, focusing on "hard-to-predict" cases. Additionaly it Handles non-linear patterns, missing data, and imbalanced datasets (common in bankruptcy cases). Built-in regularization prevents overfitting, making it robust even with small financial datasets.
 
 For example, XGBoost might detect complex interactions between profitability ratios and market conditions that simpler models miss. While less interpretable than logistic regression, its performance often dominates in predictive accuracy.
+
+In this research 100 rounds of "boosting" were performed. Reserchers belive this number performed the best out of all tested and prevent overfiting of model. Additionally, binary  function of aim was used. 
 
 ***
 
@@ -148,7 +194,7 @@ The Random Forest model is an ensemble machine learning method that builds multi
 
 ***
 
-Dodanie random forest na zwykłym i na large zbiorze
+Beyond traning and assesing models on mentioned dataset, researchers created much bigger dataset to perform additional analysys. Large traning set consist over 1000 rows, and new column, with data about . With this much data, not all of the models were compatible. Only LDA , Random Forest and XGBoost were succesfull wiith training on this amaout of information. 
 
 ***
 

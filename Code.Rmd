@@ -17,6 +17,7 @@ library(MASS)
 library(naivebayes)
 library(randomForest)
 library(xgboost)
+library(writexl)
 y5 <- read.csv("5year.arff", header = TRUE, comment.char = "@")
 colnames(y5) <- paste0("V", 1:65)
 #Removing missing data
@@ -80,7 +81,7 @@ fmla <- reformulate(final_variables, response = "V65")
 xgb_model <- xgboost(
   data = (as.matrix(training_set[,final_variables])),
   label = as.numeric(training_set$V65)-1,
-  nrounds = 100,
+  nrounds = 200,
   objective = "binary:logistic",
   verbose = 0
 )
@@ -88,11 +89,11 @@ xgb_model <- xgboost(
 pred_prob <- predict(xgb_model,  (as.matrix(testing_set[,final_variables])))
 pred_class <- ifelse(pred_prob > 0.5, 1, 0)
 
-print(length(testing_set$V65))
+print(length(pred_class))
 
 tab <- table(
-  "Actual" = levels(testing_set$V65),
-  "Predicted" = levels(pred_class)
+  "Actual" = testing_set$V65,
+  "Predicted" = pred_class
 )
 
 print(tab)
@@ -102,5 +103,53 @@ false_negative_rate <- 100 * tab["1", "0"] / sum(tab["1", ])
 
 cat("Accuracy: ", round(accuracy, 2), "%\n")
 cat("False negative rate: ", round(false_negative_rate, 2), "%\n")
+```
+
+
+***
+
+# Altman Model
+
+***
+
+
+```{r}
+altmanmodel <- training_set[,c(3,6,7,8,9,65)]
+
+colnames(altmanmodel) <- c("X1", "X2", "X3", "X4", "X5", "X6")
+
+altmanmodel<- altmanmodel%>%
+  mutate(Z_score = 1.2*X1 + 1.4*X2 + 3.3*X3 + 0.6*X4+0.99*X5)
+
+altmanmodel <- altmanmodel%>%
+  mutate(Wynik = ifelse(Z_score <1.8, "U", ifelse(Z_score<3.0, "SS", "NU")))
+
+altmanmodel <- altmanmodel%>%
+  mutate(Dokladnosc = ifelse(Wynik=="U" & X6 == 1,"UU", ifelse(Wynik=="NU" & X6 == 0, "NUNU", ifelse(Wynik=="NU" & X6 == 1, "UNU", ifelse(Wynik=="U" & X6 == 0, "NUU", ifelse(Wynik=="SS" & X6 == 0, "NUSS", "USS"))))))
+
+
+counts2 <- data.frame(Rzeczywistość = c("Alive", "Alive", "Alive", "Bancrupted", "Bancrupted", "Bancrupted"),Prognoza= c("Alive", "Grey area", "Bancrupted", "Alive", "Grey area", "Bancrupted"), Ilość = as.vector(table(altmanmodel$Dokladnosc)))
+counts2
+write_xlsx(counts2, "lda1.xlsx")
+```
+
+***
+
+# Tutson Model
+
+***
+
+
+
+```{r}
+
+model_lda <- lda(V65 ~ ., data = training_set[,c(final_variables, "V65")])
+
+predictions <- predict(model_lda, newdata = testing_set[,final_variables])
+
+# upadłe  - 1 # żywe - 0
+confusion_matrix <- table(testing_set$V65, predictions$class)
+
+confusion_matrix
 ```
 

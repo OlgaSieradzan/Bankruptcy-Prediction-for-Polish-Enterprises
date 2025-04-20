@@ -26,6 +26,15 @@ library(readxl)
 y5 <- read.csv("5year.arff", header = TRUE, comment.char = "@")
 colnames(y5) <- paste0("V", 1:65)
 
+Rates <- read_excel("Results_sheets.xlsx", 
+    sheet = "Rates")
+
+Altman <- read_excel("Results_sheets.xlsx", 
+    sheet = "LDA")
+
+Matrixes <- read_excel("Results_sheets.xlsx", 
+    sheet = "Matrix")
+
 ```
 
 ***
@@ -83,6 +92,8 @@ V60 - sales / inventory
 V61 - sales / receivables
 V64 - sales / fixed assets
 
+While assesing models researchers used 2 quantatives ; model's accuracy and false negative rate - how many % of bancruts were not discovered.
+
 
 
 ***
@@ -105,8 +116,31 @@ Grey Zone (1.81 ≤ Z ≤ 2.99) – Moderate risk.
 
 Distress (Z < 1.81) – High bankruptcy risk.
 
-The model is widely used due to its simplicity and empirical robustness.
+***
 
+**Results**
+
+***
+
+The table consist information about model's performance.
+```{r}
+Matrixes <-Matrixes %>%
+  mutate(Actual = ifelse(Actual == "1", "Bancrupted", "Alive")) %>%
+  mutate(Predicted = ifelse(Predicted == "1", "Bancrupted", "Alive"))
+
+Altman
+```
+
+A lot of companies ended up in the grey area, which is a big disadvantage of this model. In the end, model should give as precised answer as possible. 
+
+```{r}
+Rates %>%
+  filter(method == "altman")
+```
+
+If it comes to model's accuracy, it is really low - only 55%. The False negative rate on the other hand is a little bit over 35%, which is quite good, only 35% of bancrupted comapnies were not spotted. 
+
+Altman’s model, although brilliant for its time, has proven to be insufficient for the current Polish market. This may be due to the overly general nature of the model—the diagnostic variables and coefficients selected by Altman are not necessarily well-suited to companies across all markets, as they were estimated based on a very limited sample of firms from a single market. Moreover, it is worth noting that the data on which the model was built can now be considered outdated and no longer reflective of the realities faced by modern companies.
 
 ***
 
@@ -121,6 +155,8 @@ Thanks to his unwavering belief in success (and his knack for sitting on my keyb
 ```{r}
 knitr::include_graphics("C:/Users/olgas/OneDrive/Documents/GitHub/Quantative-risk-models-summit/WhatsApp Image 2025-03-06 at 09.54.51_3e79e9e8.jpg")
 ```
+
+
 
 
 The downfall of the Tutson model can be easily explained. Linear Discriminant Analysis (LDA) is a method that relies on several statistical assumptions—none of which were met by our dataset. First and foremost, LDA assumes that the predictor variables follow a normal distribution. In addition, it requires that all classes have equal covariance matrices. These assumptions are difficult to uphold in real-world data, which is one of the reasons behind the declining popularity of LDA in practical modeling applications.
@@ -171,7 +207,7 @@ XGBoost (Extreme Gradient Boosting) is a powerful machine learning algorithm tha
 
 For example, XGBoost might detect complex interactions between profitability ratios and market conditions that simpler models miss. While less interpretable than logistic regression, its performance often dominates in predictive accuracy.
 
-In this research 100 rounds of "boosting" were performed. Reserchers belive this number performed the best out of all tested and prevent overfiting of model. Additionally, binary  function of aim was used. 
+In this research 200 rounds of "boosting" were performed. Reserchers belive this number performed the best out of all tested and prevent overfiting of model. Additionally, binary  function of aim was used. 
 
 ***
 

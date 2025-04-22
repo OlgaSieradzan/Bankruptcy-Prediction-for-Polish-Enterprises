@@ -2860,7 +2860,7 @@ classified as:</p>
 The table consist information about model’s performance.
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":["Accuracy"],"name":[1],"type":["chr"],"align":["left"]},{"label":["False Negative Rate"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Method"],"name":[3],"type":["chr"],"align":["left"]}],"data":[{"1":"75","2":"31.25","3":"qda"},{"1":"71.875","2":"34.375","3":"naive bayes"},{"1":"73.4375","2":"21.875","3":"logistic regression"},{"1":"70.3125","2":"43.75","3":"random forest"},{"1":"77.4631878067683","2":"10.8527131782946","3":"large set random forest"},{"1":"73.5055541203823","2":"12.4031007751938","3":"large set LDA"},{"1":"70.31","2":"46.88","3":"xgb"},{"1":"55","2":"35.770000000000003","3":"altman"},{"1":"64.06","2":"46.87","3":"tutson"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["Accuracy"],"name":[1],"type":["chr"],"align":["left"]},{"label":["False Negative Rate"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Method"],"name":[3],"type":["chr"],"align":["left"]}],"data":[{"1":"75","2":"31.25","3":"qda"},{"1":"71.875","2":"34.375","3":"naive bayes"},{"1":"73.4375","2":"21.875","3":"logistic regression"},{"1":"70.3125","2":"43.75","3":"random forest"},{"1":"77.4631878067683","2":"10.8527131782946","3":"large set random forest"},{"1":"73.5055541203823","2":"12.4031007751938","3":"large set LDA"},{"1":"70.31","2":"46.88","3":"xgb"},{"1":"55","2":"35.770000000000003","3":"altman"},{"1":"64.06","2":"46.87","3":"tutson"},{"1":"59.375","2":"56.25","3":"lr08"},{"1":"70.31","2":"18.75","3":"lr01"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 <div data-pagedtable="false">
@@ -2999,6 +2999,11 @@ correlated variables, Naive Bayes may still perform reasonably well.</p>
 {"columns":[{"label":["Accuracy"],"name":[1],"type":["chr"],"align":["left"]},{"label":["False Negative Rate"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Method"],"name":[3],"type":["chr"],"align":["left"]}],"data":[{"1":"71.875","2":"34.375","3":"naive bayes"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
+<p>Al thought the assumption was not met, naive baias performed quite
+well, better then the LDA but slighty worse than QDA model. The False
+negative rate thought is still disappointing. Naive Bayes has not
+occurred as groundbreaking method, and the exploration for better models
+shall not stop.</p>
 <hr />
 </div>
 <div id="logistic-regression" class="section level1">
@@ -3008,21 +3013,58 @@ correlated variables, Naive Bayes may still perform reasonably well.</p>
 outcomes (e.g., bankruptcy vs. solvency) by modeling the probability of
 an event occurring. Unlike linear regression, it uses the logistic
 function (sigmoid curve) to output values between 0 and 1, interpreted
-as the likelihood of default. Key features include:</p>
-<ul>
-<li><p>Input: Financial ratios (e.g., liquidity, leverage).</p></li>
-<li><p>Output: Probability (e.g., “0.8” = 80% chance of
-bankruptcy).</p></li>
-<li><p>Advantages: Simple, interpretable (coefficients show variable
-impact), and works well for linearly separable data.</p></li>
-</ul>
-<p>For example, a model might reveal that high debt-to-equity ratios
-significantly increase bankruptcy risk. While less flexible than ML
-algorithms, it remains a benchmark tool for financial distress analysis.
-In this study, the treshold for assesing brancrupcy is: 50%&gt; -
-bancrupted, 50%=&lt; - not bancrupted. Manipulation of this treshold can
-give intresting results in Accuracy or False Negative rates</p>
-<p>Modyfikacja treshoholdu</p>
+as the likelihood of default. While less flexible than ML algorithms, it
+remains a benchmark tool for financial distress analysis. In this study,
+the treshold for assesing brancrupcy is: 50%&gt; - bancrupted, 50%=&lt;
+- not bancrupted. Manipulation of this treshold can give intresting
+results in Accuracy or False Negative rates</p>
+<hr />
+<p><strong>Results - 50% threshold</strong></p>
+<hr />
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["Actual"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Predicted"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Freq"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["method"],"name":[4],"type":["chr"],"align":["left"]}],"data":[{"1":"Alive","2":"Alive","3":"22","4":"logistic regression"},{"1":"Bancrupted","2":"Alive","3":"7","4":"logistic regression"},{"1":"Alive","2":"Bancrupted","3":"10","4":"logistic regression"},{"1":"Bancrupted","2":"Bancrupted","3":"25","4":"logistic regression"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["Accuracy"],"name":[1],"type":["chr"],"align":["left"]},{"label":["False Negative Rate"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Method"],"name":[3],"type":["chr"],"align":["left"]}],"data":[{"1":"73.4375","2":"21.875","3":"logistic regression"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>Logistic regression definitely gave some different and intresting
+results. Firstly, accuracy is pretty high which is satisfaing, but the
+really good information is a very low False Negative rate, which is
+under 22%. It’s the first model to predict less companies alive while
+bankrupted, than the other way around (bancrupted while alive). Logistic
+regression achived very promising results.</p>
+<hr />
+<p><strong>Results - 80% threshold</strong></p>
+<hr />
+<p>Managing verges of threshold is additional feature that logistic
+regression is offering. Firstly, it is research, how increasing
+threshold to as much as 80% will affect model’s rates.</p>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["Accuracy"],"name":[1],"type":["chr"],"align":["left"]},{"label":["False Negative Rate"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Method"],"name":[3],"type":["chr"],"align":["left"]}],"data":[{"1":"59.375","2":"56.25","3":"lr08"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>Results are of course dissapointing, but it was easy to predict. More
+intresting results are obtaing by lowering the threshold to jus 10%.</p>
+<hr />
+<p><strong>Results - 10% threshold</strong></p>
+<hr />
+<p>Lowering threshold may occure very usefull, because model will be
+‘more carefull’.</p>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["Accuracy"],"name":[1],"type":["chr"],"align":["left"]},{"label":["False Negative Rate"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Method"],"name":[3],"type":["chr"],"align":["left"]}],"data":[{"1":"70.31","2":"18.75","3":"lr01"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>As assumed, while accuracy might not be wonderful, the False Negative
+Rate is. Logistic Regression with 10% threshold has come out as the best
+in detecting bankrupted companies, which is a very valuable feature. For
+the bank, it will be more important not to lend money to soon bankrupted
+comapny than not to lend money to company doinbg okay.</p>
 <hr />
 </div>
 <div id="xgboost-extreme-gradient-boosting" class="section level1">
@@ -3066,12 +3108,17 @@ less interpretable than single decision trees, it’s more accurate.</p>
 <div id="large-traing-set-senerio" class="section level1">
 <h1>Large traing set senerio</h1>
 <hr />
-<p>Beyond traning and assesing models on mentioned dataset, researchers
-created much bigger dataset to perform additional analysys. Large
-traning set consist over 1000 rows, and new column, with data about .
-With this much data, not all of the models were compatible. Only LDA ,
-Random Forest and XGBoost were succesfull wiith training on this amaout
-of information.</p>
+<p>Since the project was initially based on a limited dataset—focusing
+only on companies one year before bankruptcy—we now aim to test whether
+including a new variable, “Number of years before bankruptcy,” can
+improve prediction performance. Beyond traning and assesing models on
+mentioned dataset, researchers created much bigger dataset to perform
+additional analysys. Large traning set consist over 1000 rows, and new
+column. With this much data, not all of the models were compatible. Only
+LDA , Random Forest and XGBoost were succesfull wiith training on this
+amaout of information. By expanding the dataset in this way, we increase
+the sample size, which gives us reason to believe that the models may
+achieve better results.</p>
 <hr />
 </div>
 <div id="conclusions" class="section level1">

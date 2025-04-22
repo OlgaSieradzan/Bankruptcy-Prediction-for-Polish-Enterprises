@@ -220,6 +220,39 @@ cat("False negative rate: ", 100*tab[2,1]/(tab[2,1]+tab[2,2]), "%\n")
 We've reached the accuracy of around 73,4%, which beats LDA models. 
   
    
+```{r}
+test <- predict(lr_model, testing_set, type='response')
+pred <- ifelse(test > 0.8,1,0)
+
+tab <- table(testing_set$V65, pred)
+dimnames(tab) <- list(
+  "Actual" = levels(testing_set$V65),
+  "Predicted" = levels(pred)
+)
+tab
+
+cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
+cat("False negative rate: ", 100*tab[2,1]/(tab[2,1]+tab[2,2]), "%\n")
+
+```
+
+ 
+```{r}
+test <- predict(lr_model, testing_set, type='response')
+pred <- ifelse(test > 0.1,1,0)
+
+tab <- table(testing_set$V65, pred)
+dimnames(tab) <- list(
+  "Actual" = levels(testing_set$V65),
+  "Predicted" = levels(pred)
+)
+tab
+
+cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
+cat("False negative rate: ", 100*tab[2,1]/(tab[2,1]+tab[2,2]), "%\n")
+
+```
+   
 # Random Forest  
  
 Random Forest is a machine learning algorithm based on the idea that combining many weak models can produce a stronger one—a technique known as ensemble learning. The algorithm works as follows:  

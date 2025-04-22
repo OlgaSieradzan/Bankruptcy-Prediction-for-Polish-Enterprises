@@ -69,28 +69,49 @@ After process of cleaning the traing set consist **23 variables and 140 observat
 
 The 23 left variables:
 
-V2 - total liabilities / total assets
-V3 - working capital / total assets
-V4 - current assets / short-term liabilities
-V9 - sales / total assets
-V12 - gross profit / short-term liabilities
-V13 - (gross profit + depreciation) / sales
-V15 - (total liabilities * 365) / (gross profit + depreciation)
-V20 - (inventory * 365) / sales
-V21 - sales (n) / sales (n-1)
-V24 - gross profit (in 3 years) / total assets
-V28 - working capital / fixed assets
-V29 - logarithm of total assets
-V30 - (total liabilities - cash) / sales
-V33 - operating expenses / short-term liabilities
-V37 - (current assets - inventories) / long-term liabilities
-V43 - rotation receivables + inventory turnover in days
-V55 - working capital
-V57 - (current assets - inventory - short-term liabilities) / (sales - gross profit - depreciation)
-V59 - long-term liabilities / equity
-V60 - sales / inventory
-V61 - sales / receivables
-V64 - sales / fixed assets
+* V2 - total liabilities / total assets
+
+* V3 - working capital / total assets
+
+* V4 - current assets / short-term liabilities
+
+* V9 - sales / total assets
+
+* V12 - gross profit / short-term liabilities
+
+* V13 - (gross profit + depreciation) / sales
+
+* V15 - (total liabilities * 365) / (gross profit + depreciation)
+
+* V20 - (inventory * 365) / sales
+
+* V21 - sales (n) / sales (n-1)
+
+* V24 - gross profit (in 3 years) / total assets
+
+* V28 - working capital / fixed assets
+
+* V29 - logarithm of total assets
+
+* V30 - (total liabilities - cash) / sales
+
+* V33 - operating expenses / short-term liabilities
+
+* V37 - (current assets - inventories) / long-term liabilities
+
+* V43 - rotation receivables + inventory turnover in days
+
+* V55 - working capital
+
+* V57 - (current assets - inventory - short-term liabilities) / (sales - gross profit - depreciation)
+
+* V59 - long-term liabilities / equity
+
+* V60 - sales / inventory
+
+* V61 - sales / receivables
+
+* V64 - sales / fixed assets
 
 While assesing models researchers used 2 quantatives ; model's accuracy and false negative rate - how many % of bancruts were not discovered.
 
@@ -110,11 +131,11 @@ $$
 
   represent ratios like working capital/total assets, retained earnings/total assets, EBIT/total assets, market value equity/total liabilities, and sales/total assets. Based on the Z-score, companies are classified as:
 
-Safe (Z > 2.99) – Low bankruptcy risk.
+* Safe (Z > 2.99) – Low bankruptcy risk.
 
-Grey Zone (1.81 ≤ Z ≤ 2.99) – Moderate risk.
+* Grey Zone (1.81 ≤ Z ≤ 2.99) – Moderate risk.
 
-Distress (Z < 1.81) – High bankruptcy risk.
+* Distress (Z < 1.81) – High bankruptcy risk.
 
 ***
 
@@ -128,6 +149,9 @@ Matrixes <-Matrixes %>%
   mutate(Actual = ifelse(Actual == "1", "Bancrupted", "Alive")) %>%
   mutate(Predicted = ifelse(Predicted == "1", "Bancrupted", "Alive"))
 
+colnames(Rates) <- c("Accuracy", "False Negative Rate", "Method")
+
+Rates
 Altman
 ```
 
@@ -135,7 +159,7 @@ A lot of companies ended up in the grey area, which is a big disadvantage of thi
 
 ```{r}
 Rates %>%
-  filter(method == "altman")
+  filter(Method == "altman")
 ```
 
 If it comes to model's accuracy, it is really low - only 55%. The False negative rate on the other hand is a little bit over 35%, which is quite good, only 35% of bancrupted comapnies were not spotted. 
@@ -148,16 +172,26 @@ Altman’s model, although brilliant for its time, has proven to be insufficient
 
 ***
 
-The Tutsona Model is an analytical tool researchers developed using linear discriminant analysis (LDA) tailored specifically for Polish companies. The model’s name is no accident—it pays tribute to a true master of motivation, an undisputed expert in stress management, and an unrivaled specialist in... sunbeam naps. Yes, I’m talking about Tutek, a chonky cat who not only provided moral support with his presence but also inspired groundbreaking solutions in finance and stock market analysis.
+The Tutson Model is an analytical tool researchers developed using linear discriminant analysis (LDA) tailored specifically for Polish companies. The model’s name is no accident—it pays tribute to a true master of motivation, an undisputed expert in stress management, and an unrivaled specialist in... sunbeam naps. Yes, I’m talking about Tutek, a chonky cat who not only provided moral support with his presence but also inspired groundbreaking solutions in finance and stock market analysis.
 
 Thanks to his unwavering belief in success (and his knack for sitting on my keyboard at critical moments), the Tutsona Model became a symbol of combining academic precision with feline wisdom. It’s more than just an analytical tool—it’s a tribute to a true legend, proving that even the toughest challenges can be overcome with a bit of cat philosophy and a good nap.
 
+***
+
+**Results**
+
+***
+
 ```{r}
-knitr::include_graphics("C:/Users/olgas/OneDrive/Documents/GitHub/Quantative-risk-models-summit/WhatsApp Image 2025-03-06 at 09.54.51_3e79e9e8.jpg")
+Matrixes %>%
+  filter(method == "tutson")
 ```
 
-
-
+```{r}
+Rates %>%
+  filter(Method == "tutson")
+```
+Accuracy achieved by LDA model made specifically for Polish market, is visibly higher than Altman's model outcome. Unfortunately, it's still low, and  False Negative rate is beyond disappointing. 
 
 The downfall of the Tutson model can be easily explained. Linear Discriminant Analysis (LDA) is a method that relies on several statistical assumptions—none of which were met by our dataset. First and foremost, LDA assumes that the predictor variables follow a normal distribution. In addition, it requires that all classes have equal covariance matrices. These assumptions are difficult to uphold in real-world data, which is one of the reasons behind the declining popularity of LDA in practical modeling applications.
 
@@ -172,6 +206,22 @@ But are they truly that much better? While they often outperform traditional met
 
 Quadratic Discriminant Analysis (QDA) is an extension of LDA that relaxes the assumption of equal class covariances. While this makes QDA more flexible, it comes at a cost: instead of estimating a single covariance matrix with $p(p+1)/2$ parameters (where *p* is the number of predictors), QDA requires estimating a separate covariance matrix for each class, resulting in $K*p(p+1)/2$ parameters. This significantly increases the variance of the estimators, which is why QDA isn't always preferred over LDA — especially with limited data.
 
+***
+
+**Results**
+
+***
+
+```{r}
+Matrixes %>%
+  filter(method == "qda")
+```
+
+```{r}
+Rates %>%
+  filter(Method == "qda")
+```
+If it comes to accuracy, it improved significantly, compared to previous two results. Result equal to 75% seems reasonable and quite satisfying. Additionally, QDA achived lowest False Negative Rate out of all already researched methods.  Relaxing of the assumption of equal class covariances, gave very promising result.
 
 ***  
 
@@ -181,21 +231,45 @@ Naive Bayes makes a strong assumption that all predictors are independent. This 
 
 ***
 
+**Results**
+
+***
+
+```{r}
+Matrixes %>%
+  filter(method == "naive bayes")
+```
+
+```{r}
+Rates %>%
+  filter(Method == "naive bayes")
+```
+Al thought the assumption was not met, naive baias performed quite well, better then the LDA but slighty worse than QDA model. The False negative rate thought is still disappointing. Naive Bayes has not occurred as groundbreaking method, and the exploration for better models shall not stop.
+
+***
+
 # Logistic Regression
 
 ***
 
-Logistic regression is a statistical method used to predict binary outcomes (e.g., bankruptcy vs. solvency) by modeling the probability of an event occurring. Unlike linear regression, it uses the logistic function (sigmoid curve) to output values between 0 and 1, interpreted as the likelihood of default. Key features include:
+Logistic regression is a statistical method used to predict binary outcomes (e.g., bankruptcy vs. solvency) by modeling the probability of an event occurring. Unlike linear regression, it uses the logistic function (sigmoid curve) to output values between 0 and 1, interpreted as the likelihood of default. While less flexible than ML algorithms, it remains a benchmark tool for financial distress analysis. In this study, the treshold for assesing brancrupcy is: 50%> - bancrupted, 50%=< - not bancrupted. Manipulation of this treshold can give intresting results in Accuracy or False Negative rates 
 
-* Input: Financial ratios (e.g., liquidity, leverage).
+***
 
-* Output: Probability (e.g., "0.8" = 80% chance of bankruptcy).
+**Results - 50% threshold**
 
-* Advantages: Simple, interpretable (coefficients show variable impact), and works well for linearly separable data.
+***
 
-For example, a model might reveal that high debt-to-equity ratios significantly increase bankruptcy risk. While less flexible than ML algorithms, it remains a benchmark tool for financial distress analysis. In this study, the treshold for assesing brancrupcy is: 50%> - bancrupted, 50%=< - not bancrupted. Manipulation of this treshold can give intresting results in Accuracy or False Negative rates 
+```{r}
+Matrixes %>%
+  filter(method == "logistic regression")
+```
 
-Modyfikacja treshoholdu 
+```{r}
+Rates %>%
+  filter(Method == "logistic regression")
+```
+
 
 ***
 

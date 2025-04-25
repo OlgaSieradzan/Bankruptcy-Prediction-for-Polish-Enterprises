@@ -25,7 +25,7 @@ setwd("C:/Users/olgas/OneDrive/Documents/GitHub/Quantative-risk-models-summit/Al
 # Loading data:  
 
 ```{r, warning=FALSE}
-y5 <- read.csv("5year.arff", header = TRUE, comment.char = "@") #One year till default
+y5 <- read.csv("5year.arff", header = FALSE, comment.char = "@") #One year till default
 
 #Removing missing data
 data <- y5[-which(y5 == "?"),] 
@@ -78,6 +78,90 @@ final_variables <- setdiff(variables, to_remove)
 fmla <- reformulate(final_variables, response = "V65")
 ```  
  
+  
+# Models found in literature 
+  
+First, we've decided to test *E. Mączyńska's model* which presents as follows:  
+$Z(M) = 9,478X_{1} + 3,613X_{2} + 3,246X_{3} + 0,455X_{4} + 0,802X_{5} - 2,478$  
+  
+Where:    
+
+- X1 - profit on operating activities / total assets  
+
+- X2 - equity / total assets  
+ 
+- X3 - (net profit + depreciation) / total liabilities 
+ 
+- X4 - current assets / short-term liabilities  
+
+- X5 - (sales + profit on operating activities) / total assets 
+ 
+The model contains a constant, so the interpretation is pretty straightforward:
+ 
+- Z(M) > 0 - no-default  
+- Z(M) <= 0 - default  
+
+```{r}
+X1 <- testing_set$V22
+X2 <- testing_set$V10
+X3 <- testing_set$V26
+X4 <- testing_set$V4
+X5 <- testing_set$V9 + testing_set$V22
+
+df4 <- data.frame(x1 = X1, x2 = X2, x3 = X3, x4 = X4, x5 = X5, y = testing_set$V65)
+df4$z <- 9.478*X1 + 3.613*X2 + 3.246*X3 + 0.455*X4 + 0.802*X5 - 2.478
+df4$y_hat <- ifelse(df4$z > 0, 0, 1)
+
+tab <- table(df4$y, df4$y_hat)
+dimnames(tab) <- list("Actual" = levels(as.factor(df4$y)),  
+                      "Predicted" = levels(as.factor(df4$y_hat)))
+tab
+cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
+cat("False negative rate: ", 100*tab[2,1]/(tab[2,1]+tab[2,2]), "%\n")
+```  
+ 
+Mączyńska's model achieved an accuracy of 65.63% and a false negative rate of 56.25%, which indicates rather poor performance for a bankruptcy prediction model. 
+ 
+Lastly, we'll test the *Poznański model*:  
+ 
+$Z(P) = 3,562X_{1} + 1,58*X_{2} + 4,288X_{3} + 6,719X_{4} - 2,368$ 
+  
+Where: 
+  
+- X1 - net profit / total assets  
+
+- X2 - (current assets - inventory) / short-term liabilities  
+
+- X3 - (equity + long-term liabilities) / total assets  
+
+- X4 - gross profit / sales  
+  
+The interpretation is the same as in *Mączyńska's model*:  
+ 
+- Z(P) > 0 no-default 
+- Z(P) <= 0 default  
+  
+```{r}
+X1 <- testing_set$V1
+X2 <- testing_set$V46
+X3 <- testing_set$V10 + (testing_set$V10 * testing_set$V59)
+X4 <- testing_set$V19
+
+
+df5 <- data.frame(x1 = X1, x2 = X2, x3 = X3, x4 = X4, y = testing_set$V65)
+df5$z <- 3.562*X1 + 1.58*X2 + 4.288*X3 + 6.719*X4 - 2.368
+df5$y_hat <- ifelse(df5$z > 0, 0, 1)
+
+tab <- table(df5$y, df5$y_hat)
+dimnames(tab) <- list("Actual" = levels(as.factor(df5$y)),  
+                      "Predicted" = levels(as.factor(df5$y_hat)))
+tab
+cat("Accuracy: ", 100*(tab[1,1] + tab[2,2])/sum(tab), "%\n")
+cat("False negative rate: ", 100*tab[2,1]/(tab[2,1]+tab[2,2]), "%\n")
+```
+Once again, we might as well rely on a coin toss for bankruptcy detection rather than using the model.  
+As demonstrated, linear discriminant models perform quite poorly—even those specifically designed with Polish economic conditions in mind. One of the key reasons is that linear models rely on certain assumptions that are often not satisfied in practice. We will discuss these assumptions in the following section.
+  
 # Assumptions in LDA  
  
 LDA relies on two key assumptions:  
@@ -136,8 +220,9 @@ var_list
   
 We can see that this assumption also does not hold for most of the 64 predictors. 
  
-Thankfully LDA is quite resistant to violated assumptions.
+Thankfully LDA is quite resistant to violated assumptions.  
  
+  
 # QDA  
  
 Quadratic Discriminant Analysis (QDA) is an extension of LDA that relaxes the assumption of equal class covariances. While this makes QDA more flexible, it comes at a cost: instead of estimating a single covariance matrix with $p(p+1)/2$ parameters (where *p* is the number of predictors), QDA requires estimating a separate covariance matrix for each class, resulting in $K*p(p+1)/2$ parameters. This significantly increases the variance of the estimators, which is why QDA isn't always preferred over LDA — especially with limited data.

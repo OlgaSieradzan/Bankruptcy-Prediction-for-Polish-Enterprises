@@ -315,12 +315,46 @@ In this research 200 rounds of "boosting" were performed. Reserchers belive this
 
 ***
 
+**Results**
+
+***
+
+```{r}
+Matrixes %>%
+  filter(method == "xgb")
+```
+
+```{r}
+Rates %>%
+  filter(Method == "xgb")
+```
+
+XGBoost algorithm, althought very complex, with this amount of data performed disappointingly. It did not achive results significantly higher than other models, and Flase negative rate came out definitly too high.
+
+***
+
 # Random Forest Model
 
 ***
 
 The Random Forest model is an ensemble machine learning method that builds multiple decision trees and merges their predictions to improve accuracy and reduce overfitting. Model trains hundreds of decision trees on random subsets of data (bagging) and features (feature randomness). Combines their votes (for classification) or averages their outputs (for regression). This model handles non-linear relationships and high-dimensional data (e.g., dozens of financial ratios),althought it's less interpretable than single decision trees, it's more accurate.
 
+***
+
+**Results**
+
+***
+
+```{r}
+Matrixes %>%
+  filter(method == "random forest")
+```
+
+```{r}
+Rates %>%
+  filter(Method == "random forest")
+```
+Situation seems the same as in the XGB algorithm. The amount of data is not sufficient, which led to disappointing results. The accuracy is the same as in the previous method, and False Negative rate is slightly better but still not satisfying.
 
 ***
 
@@ -328,13 +362,62 @@ The Random Forest model is an ensemble machine learning method that builds multi
 
 ***
 
+The aim of the research, is to not only to show potential methods to resolve problem of bancrupcy prediction, but also to assest those method and petencially choose the best one. 
+
+***
+
+**Accuracy**
+
+***
+
+One of the rates, used to asset model is accuracy, the percent of correctly predicted states of company (bankrupted/alive). It is wanted , that model has very high accuracy. 
+
+```{r}
+Rates$Accuracy <- as.numeric(Rates$Accuracy)
+
+  ggplot(Rates[c(1,2,3,4,7,8,9,10,11),], aes(x = reorder(Method, Accuracy), y = Accuracy)) +
+  geom_bar(stat = "identity", fill = "orange") +
+  geom_text(aes(label = round(Accuracy, 1)), vjust = -0.5, size = 3.5) +
+  labs(title = NULL,
+       x = "Metoda",
+       y = "Accuracy (%)") +
+  theme_minimal(base_size = 18) +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+
+```
+
+The QDA method has achived the highest accuracy of all of the models, but it is important to mention that differences between most of the models are not really significant. Definietly, altman model, tutson model and logistic regression with high treshhold, are the worst of all researched methods and can be defined as nor really promising. Machine learning algorithms performed disappointingly, it did not occur significantly better than statistical method as it may seem at first. 
+
+***
+
+**Fase Negative Rate**
+
+***
+
+One of the rates, used to asset model is accuracy, the percent of correctly predicted states of company (bankrupted/alive). It is wanted , that model has very high accuracy. 
+
+```{r}
+Rates$`False Negative Rate` <- as.numeric(Rates$`False Negative Rate`)
+
+  ggplot(Rates[c(1,2,3,4,7,8,9,10,11),], aes(x = reorder(Method, `False Negative Rate`), y = `False Negative Rate`)) +
+  geom_bar(stat = "identity", fill = "orange") +
+  geom_text(aes(label = round(`False Negative Rate`, 1)), vjust = -0.5, size = 3.5) +
+  labs(title = NULL,
+       x = "Metoda",
+       y = "FNR (%)") +
+  theme_minimal(base_size = 18) +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+
+```
+
+
 ***
 
 # Large traing set senerio
 
 ***
 
-Since the project was initially based on a limited dataset—focusing only on companies one year before bankruptcy—we now aim to test whether including a new variable, "Number of years before bankruptcy," can improve prediction performance. Beyond traning and assesing models on mentioned dataset, researchers created much bigger dataset to perform additional analysys. Large traning set consist over 1000 rows, and new column. With this much data, not all of the models were compatible. Only LDA , Random Forest and XGBoost were succesfull wiith training on this amaout of information.  By expanding the dataset in this way, we increase the sample size, which gives us reason to believe that the models may achieve better results.  
+Since the project was initially based on a limited dataset—focusing only on companies one year before bankruptcy—we now aim to test whether including a new variable, "Number of years before bankruptcy," can improve prediction performance. Researchers created much bigger dataset to perform additional analysys. Large traning set consist over 1000 rows, and new column. With this much data, not all of the models were compatible. Only LDA , Random Forest and XGBoost were succesfull wiith training on this amaout of information.  By expanding the dataset in this way, we increase the sample size, which gives us reason to believe that the models may achieve better results.  
 
 ***
 
